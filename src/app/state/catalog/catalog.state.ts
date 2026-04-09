@@ -21,7 +21,7 @@ export interface CatalogCacheEntry {
 }
 
 export interface CatalogState {
-  products: EntityState<Product, number>;
+  products: EntityState<Product>;
   query: CatalogQuery;
   pageNumber: number;
   totalElements: number;
@@ -68,7 +68,7 @@ export const catalogFeature = createFeature({
   name: 'catalog',
   reducer: createReducer(
     initialState,
-    on(catalogActions.QueryChanged, (state, { query }) => ({
+    on(catalogActions.queryChanged, (state, { query }) => ({
       ...state,
       query: {
         ...state.query,
@@ -76,15 +76,15 @@ export const catalogFeature = createFeature({
         page: query.page ?? 0
       }
     })),
-    on(catalogActions.PageChanged, (state, { page }) => ({
+    on(catalogActions.pageChanged, (state, { page }) => ({
       ...state,
       query: {
         ...state.query,
         page: Math.max(0, page)
       }
     })),
-    on(catalogActions.LoadRequested, (state) => ({ ...state, loading: true, error: null })),
-    on(catalogActions.CacheServed, (state, { queryKey }) => {
+    on(catalogActions.loadRequested, (state) => ({ ...state, loading: true, error: null })),
+    on(catalogActions.cacheServed, (state, { queryKey }) => {
       const cached = state.cache[queryKey];
       if (!cached) {
         return state;
@@ -98,7 +98,7 @@ export const catalogFeature = createFeature({
         totalPages: cached.totalPages
       };
     }),
-    on(catalogActions.LoadSucceeded, (state, { items, page, totalElements, totalPages, queryKey }) => ({
+    on(catalogActions.loadSucceeded, (state, { items, page, totalElements, totalPages, queryKey }) => ({
       ...state,
       loading: false,
       error: null,
@@ -117,7 +117,7 @@ export const catalogFeature = createFeature({
         }
       }
     })),
-    on(catalogActions.LoadFailed, (state, { message }) => ({ ...state, loading: false, error: message }))
+    on(catalogActions.loadFailed, (state, { message }) => ({ ...state, loading: false, error: message }))
   )
 });
 

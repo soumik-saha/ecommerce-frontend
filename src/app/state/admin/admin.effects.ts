@@ -12,11 +12,11 @@ export class AdminEffects {
 
   readonly loadDashboard$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(adminActions.DashboardRequested),
+      ofType(adminActions.dashboardRequested),
       switchMap(() =>
         this.datasource.loadDashboard().pipe(
           map((payload) =>
-            adminActions.DashboardSucceeded({
+            adminActions.dashboardSucceeded({
               products: payload.products,
               users: payload.users,
               orders: payload.orders
@@ -24,7 +24,7 @@ export class AdminEffects {
           ),
           catchError((error: unknown) =>
             of(
-              adminActions.DashboardFailed({
+              adminActions.dashboardFailed({
                 message: this.sessionStore.getErrorMessage(error)
               })
             )

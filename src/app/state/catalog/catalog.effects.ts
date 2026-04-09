@@ -1,8 +1,7 @@
 import { inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { concatLatestFrom } from '@ngrx/operators';
 import { Store } from '@ngrx/store';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { catchError, map, of, switchMap, withLatestFrom } from 'rxjs';
 import { ApiClient } from '../../core/api-client';
 import { SessionStore } from '../../core/session.store';
 import { catalogActions } from './catalog.state';
@@ -16,15 +15,15 @@ export class CatalogEffects {
 
   readonly loadCatalog$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(catalogActions.LoadRequested),
-      concatLatestFrom(() => [
+      ofType(catalogActions.loadRequested),
+      withLatestFrom(
         this.store.select(selectCatalogQuery),
         this.store.select(selectCatalogQueryKey),
         this.store.select(selectCatalogCacheEntry)
-      ]),
+      ),
       switchMap(([, query, queryKey, cached]) => {
         if (cached) {
-          return of(catalogActions.CacheServed({ queryKey }));
+          return of(catalogActions.cacheServed({ queryKey }));
         }
 
         return this.api.listProducts({
@@ -36,7 +35,7 @@ export class CatalogEffects {
           size: query.size
         }).pipe(
           map((response) =>
-            catalogActions.LoadSucceeded({
+            catalogActions.loadSucceeded({
               items: response.content ?? [],
               page: response.number ?? query.page ?? 0,
               totalElements: response.totalElements ?? 0,
@@ -46,7 +45,7 @@ export class CatalogEffects {
           ),
           catchError((error: unknown) =>
             of(
-              catalogActions.LoadFailed({
+              catalogActions.loadFailed({
                 message: this.sessionStore.getErrorMessage(error)
               })
             )

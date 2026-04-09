@@ -12,13 +12,13 @@ export class CartEffects {
 
   readonly refresh$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(cartActions.RefreshRequested),
+      ofType(cartActions.refreshRequested),
       switchMap(() =>
         this.api.getCart().pipe(
-          map((items) => cartActions.RefreshSucceeded({ items })),
+          map((items) => cartActions.refreshSucceeded({ items })),
           catchError((error: unknown) =>
             of(
-              cartActions.RefreshFailed({
+              cartActions.refreshFailed({
                 message: this.sessionStore.getErrorMessage(error)
               })
             )

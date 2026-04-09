@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { ProductCardComponent } from '../../../shared/product-card.component';
@@ -89,12 +89,12 @@ export class CatalogPageComponent {
 
   constructor() {
     this.keyword = this.query().keyword;
-    this.store.dispatch(catalogActions.LoadRequested());
+    this.store.dispatch(catalogActions.loadRequested());
   }
 
   protected search(): void {
-    this.store.dispatch(catalogActions.QueryChanged({ query: { keyword: this.keyword, page: 0 } }));
-    this.store.dispatch(catalogActions.LoadRequested());
+    this.store.dispatch(catalogActions.queryChanged({ query: { keyword: this.keyword, page: 0 } }));
+    this.store.dispatch(catalogActions.loadRequested());
   }
 
   protected toggleFilters(): void {
@@ -102,19 +102,19 @@ export class CatalogPageComponent {
   }
 
   protected updateFilters(changes: Partial<CatalogQuery>): void {
-    this.store.dispatch(catalogActions.QueryChanged({ query: { ...changes, page: 0 } }));
-    this.store.dispatch(catalogActions.LoadRequested());
+    this.store.dispatch(catalogActions.queryChanged({ query: { ...changes, page: 0 } }));
+    this.store.dispatch(catalogActions.loadRequested());
   }
 
   protected nextPage(): void {
     const current = this.query().page;
-    this.store.dispatch(catalogActions.PageChanged({ page: current + 1 }));
-    this.store.dispatch(catalogActions.LoadRequested());
+    this.store.dispatch(catalogActions.pageChanged({ page: current + 1 }));
+    this.store.dispatch(catalogActions.loadRequested());
   }
 
   protected previousPage(): void {
     const current = this.query().page;
-    this.store.dispatch(catalogActions.PageChanged({ page: Math.max(0, current - 1) }));
-    this.store.dispatch(catalogActions.LoadRequested());
+    this.store.dispatch(catalogActions.pageChanged({ page: Math.max(0, current - 1) }));
+    this.store.dispatch(catalogActions.loadRequested());
   }
 }

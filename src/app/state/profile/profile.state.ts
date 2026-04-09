@@ -28,8 +28,8 @@ export const profileFeature = createFeature({
   name: 'profile',
   reducer: createReducer(
     initialState,
-    on(profileActions.LoadRequested, (state) => ({ ...state, loading: true, error: null })),
-    on(profileActions.LoadSucceeded, (_, { orders, addresses }) => ({ orders, addresses, loading: false, error: null })),
-    on(profileActions.LoadFailed, (state, { message }) => ({ ...state, loading: false, error: message }))
+    on(profileActions.loadRequested, (state) => ({ ...state, loading: true, error: null })),
+    on(profileActions.loadSucceeded, (_, { orders, addresses }) => ({ orders, addresses, loading: false, error: null })),
+    on(profileActions.loadFailed, (state, { message }) => ({ ...state, loading: false, error: message }))
   )
 });

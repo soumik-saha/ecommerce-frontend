@@ -22,7 +22,7 @@ export const selectCatalogCacheEntry = createSelector(
 );
 
 export const selectCatalogProducts = createSelector(
-  catalogFeature.selectState,
+  catalogFeature.selectCatalogState,
   selectCatalogCacheEntry,
   selectCatalogQuery,
   (state, cacheEntry, query): Product[] => {

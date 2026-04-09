@@ -28,14 +28,14 @@ export const cartFeature = createFeature({
   name: 'cart',
   reducer: createReducer(
     initialState,
-    on(cartActions.RefreshRequested, (state) => ({ ...state, loading: true, error: null })),
-    on(cartActions.RefreshSucceeded, (state, { items }) => ({
+    on(cartActions.refreshRequested, (state) => ({ ...state, loading: true, error: null })),
+    on(cartActions.refreshSucceeded, (state, { items }) => ({
       ...state,
       items,
       loading: false,
       error: null,
       lastSyncedAt: new Date().toISOString()
     })),
-    on(cartActions.RefreshFailed, (state, { message }) => ({ ...state, loading: false, error: message }))
+    on(cartActions.refreshFailed, (state, { message }) => ({ ...state, loading: false, error: message }))
   )
 });

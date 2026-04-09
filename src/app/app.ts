@@ -52,7 +52,7 @@ export class App {
     this.observability.recordUiAction('app.initialized');
     const session = this.sessionStore.session();
     if (session) {
-      this.store.dispatch(authActions.SessionRestored({ userId: session.userId, email: session.email, role: session.role }));
+      this.store.dispatch(authActions.sessionRestored({ userId: session.userId, email: session.email, role: session.role }));
     }
 
     this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
@@ -98,14 +98,14 @@ export class App {
     const api = this.injector.get(ApiClient);
     api.logout().subscribe({
       next: () => {
-        this.store.dispatch(authActions.LoggedOut());
+        this.store.dispatch(authActions.loggedOut());
         this.sessionStore.clear();
         this.observability.recordUiAction('session.logout.success');
         this.toast.info('Signed out successfully');
         void this.router.navigate(['/login']);
       },
       error: () => {
-        this.store.dispatch(authActions.LoggedOut());
+        this.store.dispatch(authActions.loggedOut());
         this.sessionStore.clear();
         this.observability.recordError('session.logout.error');
         this.toast.info('Session ended. Please sign in again.');

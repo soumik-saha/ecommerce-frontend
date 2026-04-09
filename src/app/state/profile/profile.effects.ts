@@ -12,21 +12,21 @@ export class ProfileEffects {
 
   readonly load$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(profileActions.LoadRequested),
+      ofType(profileActions.loadRequested),
       switchMap(() => {
         const userId = this.sessionStore.currentUserId();
         if (!userId) {
-          return of(profileActions.LoadSucceeded({ orders: [], addresses: [] }));
+          return of(profileActions.loadSucceeded({ orders: [], addresses: [] }));
         }
 
         return forkJoin({
           orders: this.api.listOrders(),
           user: this.api.getUser(userId)
         }).pipe(
-          map(({ orders, user }) => profileActions.LoadSucceeded({ orders, addresses: [user.address] })),
+          map(({ orders, user }) => profileActions.loadSucceeded({ orders, addresses: [user.address] })),
           catchError((error: unknown) =>
             of(
-              profileActions.LoadFailed({
+              profileActions.loadFailed({
                 message: this.sessionStore.getErrorMessage(error)
               })
             )

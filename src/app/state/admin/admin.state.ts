@@ -3,8 +3,8 @@ import { createActionGroup, createFeature, createReducer, emptyProps, on, props 
 import { Order, Product, User } from '../../core/models';
 
 export interface AdminState {
-  products: EntityState<Product, number>;
-  users: EntityState<User, number>;
+  products: EntityState<Product>;
+  users: EntityState<User>;
   orders: Order[];
   loading: boolean;
   error: string | null;
@@ -34,8 +34,8 @@ export const adminFeature = createFeature({
   name: 'admin',
   reducer: createReducer(
     initialState,
-    on(adminActions.DashboardRequested, (state) => ({ ...state, loading: true, error: null })),
-    on(adminActions.DashboardSucceeded, (state, { products, users, orders }) => ({
+    on(adminActions.dashboardRequested, (state) => ({ ...state, loading: true, error: null })),
+    on(adminActions.dashboardSucceeded, (state, { products, users, orders }) => ({
       ...state,
       loading: false,
       error: null,
@@ -43,6 +43,6 @@ export const adminFeature = createFeature({
       users: userAdapter.setAll(users, state.users),
       orders
     })),
-    on(adminActions.DashboardFailed, (state, { message }) => ({ ...state, loading: false, error: message }))
+    on(adminActions.dashboardFailed, (state, { message }) => ({ ...state, loading: false, error: message }))
   )
 });

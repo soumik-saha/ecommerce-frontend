@@ -28,7 +28,7 @@ export const authFeature = createFeature({
   name: 'auth',
   reducer: createReducer(
     initialState,
-    on(authActions.SessionRestored, (_, { userId, email, role }) => ({ userId, email, role, authenticated: true })),
-    on(authActions.LoggedOut, () => initialState)
+    on(authActions.sessionRestored, (_, { userId, email, role }) => ({ userId, email, role, authenticated: true })),
+    on(authActions.loggedOut, () => initialState)
   )
 });
