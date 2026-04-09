@@ -1,0 +1,61 @@
+<div class="layout">
+  <app-toast-outlet />
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="header">
+    <a class="brand" routerLink="/home" aria-label="EcomHub Home">
+      <span class="brand-mark">EH</span>
+      <span class="brand-text">
+        <strong>EcomHub</strong>
+        <small>Commerce Operations</small>
+      </span>
+    </a>
+
+    <button
+      type="button"
+      class="menu-toggle"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-controls="primary-nav"
+      aria-label="Toggle navigation menu"
+    >
+      {{ mobileMenuOpen() ? 'Close' : 'Menu' }}
+    </button>
+
+    <nav class="nav" id="primary-nav" [class.open]="mobileMenuOpen()" aria-label="Primary">
+      <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()">Home</a>
+      <a routerLink="/products" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()">Catalog</a>
+      @if (isAuthenticated()) {
+        <a routerLink="/profile" routerLinkActive="active" (click)="closeMobileMenu()">Profile</a>
+        <a routerLink="/wishlist" routerLinkActive="active" (click)="closeMobileMenu()">Wishlist</a>
+        <a routerLink="/cart" routerLinkActive="active" (click)="closeMobileMenu()">Cart</a>
+        <a routerLink="/checkout" routerLinkActive="active" (click)="closeMobileMenu()">Checkout</a>
+        <a routerLink="/orders" routerLinkActive="active" (click)="closeMobileMenu()">Orders</a>
+      }
+      @if (isAdmin()) {
+        <a routerLink="/admin" routerLinkActive="active" (click)="closeMobileMenu()">Admin</a>
+        <a routerLink="/admin/audit" routerLinkActive="active" (click)="closeMobileMenu()">Audit Log</a>
+      }
+    </nav>
+
+    <div class="right">
+      @if (avatarUrl()) {
+        <img [src]="avatarUrl()" alt="Profile" class="avatar-chip">
+      }
+      <span class="identity">{{ currentEmail() }}</span>
+      @if (!isAuthenticated()) {
+        <a class="ghost" routerLink="/login" (click)="closeMobileMenu()">Login</a>
+        <a class="cta" routerLink="/register" (click)="closeMobileMenu()">Register</a>
+      } @else {
+        <button type="button" class="ghost" (click)="logout()" [disabled]="isLoggingOut()">
+          {{ isLoggingOut() ? 'Signing out...' : 'Logout' }}
+        </button>
+      }
+    </div>
+  </header>
+
+  <main id="main-content" tabindex="-1">
+    <router-outlet />
+  </main>
+</div>
