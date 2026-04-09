@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 
 const KEY = 'ecom.slo.policy';
 
@@ -30,6 +31,8 @@ const DEFAULT_POLICY: SloPolicy = {
 
 @Injectable({ providedIn: 'root' })
 export class SloPolicyStore {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly state = signal<SloPolicy>(this.load());
   readonly policy = this.state.asReadonly();
 
@@ -99,10 +102,19 @@ export class SloPolicyStore {
 
   private persist(next: SloPolicy): void {
     this.state.set(next);
+
+    if (!this.isBrowser) {
+      return;
+    }
+
     localStorage.setItem(KEY, JSON.stringify(next));
   }
 
   private load(): SloPolicy {
+    if (!this.isBrowser) {
+      return DEFAULT_POLICY;
+    }
+
     const raw = localStorage.getItem(KEY);
     if (!raw) {
       return DEFAULT_POLICY;

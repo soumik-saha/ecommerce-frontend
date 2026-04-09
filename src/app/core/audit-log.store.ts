@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 
 const KEY = 'ecom.audit.logs';
 
@@ -15,6 +16,8 @@ export interface AuditLogEntry {
 
 @Injectable({ providedIn: 'root' })
 export class AuditLogStore {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly state = signal<AuditLogEntry[]>(this.load());
   readonly logs = this.state.asReadonly();
 
@@ -87,10 +90,19 @@ export class AuditLogStore {
 
   private persist(next: AuditLogEntry[]): void {
     this.state.set(next);
+
+    if (!this.isBrowser) {
+      return;
+    }
+
     localStorage.setItem(KEY, JSON.stringify(next));
   }
 
   private load(): AuditLogEntry[] {
+    if (!this.isBrowser) {
+      return [];
+    }
+
     const raw = localStorage.getItem(KEY);
     if (!raw) {
       return [];

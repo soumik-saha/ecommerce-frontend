@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 
 const KEY = 'ecom.user.preferences';
 
@@ -18,8 +19,15 @@ const DEFAULT_PREFERENCES: UserPreferences = {
 
 @Injectable({ providedIn: 'root' })
 export class UserPreferencesStore {
-  private readonly state = signal<UserPreferences>(this.load());
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly state = signal<UserPreferences>(DEFAULT_PREFERENCES);
   readonly preferences = this.state.asReadonly();
+
+  constructor() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.state.set(this.load());
+    }
+  }
 
   update(partial: Partial<UserPreferences>): void {
     const next = { ...this.state(), ...partial };
@@ -32,10 +40,19 @@ export class UserPreferencesStore {
 
   private persist(next: UserPreferences): void {
     this.state.set(next);
+
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
     localStorage.setItem(KEY, JSON.stringify(next));
   }
 
   private load(): UserPreferences {
+    if (!isPlatformBrowser(this.platformId)) {
+      return DEFAULT_PREFERENCES;
+    }
+
     const raw = localStorage.getItem(KEY);
     if (!raw) {
       return DEFAULT_PREFERENCES;

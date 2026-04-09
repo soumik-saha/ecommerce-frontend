@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 const KEY = 'ecom.feature.flags';
@@ -52,6 +53,8 @@ const LOCKED_FLAGS = new Set<FeatureFlagKey>((environment.featureFlags?.locked ?
 
 @Injectable({ providedIn: 'root' })
 export class FeatureFlagsStore {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly state = signal<FeatureFlagsState>(this.load());
   private readonly requestsState = signal<FeatureFlagChangeRequest[]>(this.loadRequests());
   private readonly sourceState = signal<Record<FeatureFlagKey, 'default' | 'override'>>({
@@ -205,15 +208,29 @@ export class FeatureFlagsStore {
 
   private persist(next: FeatureFlagsState): void {
     this.state.set(next);
+
+    if (!this.isBrowser) {
+      return;
+    }
+
     localStorage.setItem(KEY, JSON.stringify(next));
   }
 
   private persistRequests(next: FeatureFlagChangeRequest[]): void {
     this.requestsState.set(next);
+
+    if (!this.isBrowser) {
+      return;
+    }
+
     localStorage.setItem(REQUESTS_KEY, JSON.stringify(next));
   }
 
   private load(): FeatureFlagsState {
+    if (!this.isBrowser) {
+      return DEFAULT_FLAGS;
+    }
+
     const raw = localStorage.getItem(KEY);
     if (!raw) {
       return DEFAULT_FLAGS;
@@ -241,6 +258,10 @@ export class FeatureFlagsStore {
   }
 
   private loadRequests(): FeatureFlagChangeRequest[] {
+    if (!this.isBrowser) {
+      return [];
+    }
+
     const raw = localStorage.getItem(REQUESTS_KEY);
     if (!raw) {
       return [];

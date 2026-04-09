@@ -1,9 +1,12 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 
 const KEY = 'ecom.wishlist.ids';
 
 @Injectable({ providedIn: 'root' })
 export class WishlistStore {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly idsState = signal<number[]>(this.load());
   readonly ids = this.idsState.asReadonly();
   readonly count = computed(() => this.idsState().length);
@@ -36,10 +39,19 @@ export class WishlistStore {
 
   private persist(ids: number[]): void {
     this.idsState.set(ids);
+
+    if (!this.isBrowser) {
+      return;
+    }
+
     localStorage.setItem(KEY, JSON.stringify(ids));
   }
 
   private load(): number[] {
+    if (!this.isBrowser) {
+      return [];
+    }
+
     const raw = localStorage.getItem(KEY);
     if (!raw) {
       return [];

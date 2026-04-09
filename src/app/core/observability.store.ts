@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 
 const KEY = 'ecom.observability.metrics';
 
@@ -25,8 +26,16 @@ export interface EndpointReliabilityInsight {
 
 @Injectable({ providedIn: 'root' })
 export class ObservabilityStore {
-  private readonly state = signal<ClientMetric[]>(this.load());
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
+  private readonly state = signal<ClientMetric[]>([]);
   readonly metrics = this.state.asReadonly();
+
+  constructor() {
+    if (this.isBrowser) {
+      this.state.set(this.load());
+    }
+  }
 
   readonly summary = computed(() => {
     const all = this.state();
@@ -148,6 +157,10 @@ export class ObservabilityStore {
   }
 
   private sanitizeUrl(url: string): string {
+    if (!this.isBrowser) {
+      return url;
+    }
+
     try {
       const parsed = new URL(url, window.location.origin);
       return parsed.pathname;
@@ -158,10 +171,19 @@ export class ObservabilityStore {
 
   private persist(next: ClientMetric[]): void {
     this.state.set(next);
+
+    if (!this.isBrowser) {
+      return;
+    }
+
     localStorage.setItem(KEY, JSON.stringify(next));
   }
 
   private load(): ClientMetric[] {
+    if (!this.isBrowser) {
+      return [];
+    }
+
     const raw = localStorage.getItem(KEY);
     if (!raw) {
       return [];
