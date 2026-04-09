@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Injector, PLATFORM_ID, computed, effect, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Store } from '@ngrx/store';
 import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ApiClient } from './core/api-client';
 import { AuditSyncService } from './core/audit-sync.service';
@@ -9,6 +10,7 @@ import { ObservabilityStore } from './core/observability.store';
 import { SessionStore } from './core/session.store';
 import { UiToastService } from './core/ui-toast.service';
 import { UserPreferencesStore } from './core/user-preferences.store';
+import { authActions } from './state/auth/auth.state';
 import { ToastOutletComponent } from './shared/toast-outlet.component';
 
 @Component({
@@ -25,6 +27,7 @@ export class App {
   private readonly preferencesStore = inject(UserPreferencesStore);
   private readonly observability = inject(ObservabilityStore);
   private readonly _auditSync = inject(AuditSyncService);
+  private readonly store = inject(Store);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly navStartTimeById = new Map<number, number>();
@@ -47,6 +50,10 @@ export class App {
     });
 
     this.observability.recordUiAction('app.initialized');
+    const session = this.sessionStore.session();
+    if (session) {
+      this.store.dispatch(authActions.SessionRestored({ userId: session.userId, email: session.email, role: session.role }));
+    }
 
     this.router.events.pipe(takeUntilDestroyed()).subscribe((event) => {
       if (event instanceof NavigationStart) {
@@ -91,12 +98,14 @@ export class App {
     const api = this.injector.get(ApiClient);
     api.logout().subscribe({
       next: () => {
+        this.store.dispatch(authActions.LoggedOut());
         this.sessionStore.clear();
         this.observability.recordUiAction('session.logout.success');
         this.toast.info('Signed out successfully');
         void this.router.navigate(['/login']);
       },
       error: () => {
+        this.store.dispatch(authActions.LoggedOut());
         this.sessionStore.clear();
         this.observability.recordError('session.logout.error');
         this.toast.info('Session ended. Please sign in again.');
