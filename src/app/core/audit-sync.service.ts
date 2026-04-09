@@ -1,9 +1,12 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { ApiClient } from './api-client';
 import { AuditLogStore } from './audit-log.store';
 
 @Injectable({ providedIn: 'root' })
 export class AuditSyncService {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly api = inject(ApiClient);
   private readonly audit = inject(AuditLogStore);
 
@@ -13,6 +16,10 @@ export class AuditSyncService {
   readonly isSyncing = this.syncing.asReadonly();
 
   constructor() {
+    if (!this.isBrowser) {
+      return;
+    }
+
     window.addEventListener('online', () => {
       void this.syncNow();
     });
@@ -38,7 +45,7 @@ export class AuditSyncService {
   }
 
   private async syncEntries(sourceEntries?: ReturnType<AuditLogStore['pending']>): Promise<void> {
-    if (this.syncing() || !navigator.onLine) {
+    if (!this.isBrowser || this.syncing() || !navigator.onLine) {
       return;
     }
 

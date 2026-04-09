@@ -1,4 +1,5 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { Role } from './models';
 import { SessionStore } from './session.store';
 
@@ -70,6 +71,8 @@ export interface PermissionRoleDiff {
 
 @Injectable({ providedIn: 'root' })
 export class PermissionsStore {
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
   private readonly session = inject(SessionStore);
   private readonly overrides = signal<Partial<Record<Role, AppPermission[]>>>(this.loadOverrides());
   private readonly historyState = signal<PermissionVersion[]>(this.loadHistory());
@@ -120,6 +123,11 @@ export class PermissionsStore {
 
   clearHistory(): void {
     this.historyState.set([]);
+
+    if (!this.isBrowser) {
+      return;
+    }
+
     localStorage.removeItem(HISTORY_KEY);
   }
 
@@ -158,7 +166,10 @@ export class PermissionsStore {
 
   private persist(next: Partial<Record<Role, AppPermission[]>>, reason: string): void {
     this.overrides.set(next);
-    localStorage.setItem(KEY, JSON.stringify(next));
+
+    if (this.isBrowser) {
+      localStorage.setItem(KEY, JSON.stringify(next));
+    }
 
     const snapshot: PermissionVersion = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
@@ -169,10 +180,17 @@ export class PermissionsStore {
 
     const history = [snapshot, ...this.historyState()].slice(0, 80);
     this.historyState.set(history);
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+
+    if (this.isBrowser) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
   }
 
   private loadOverrides(): Partial<Record<Role, AppPermission[]>> {
+    if (!this.isBrowser) {
+      return {};
+    }
+
     const raw = localStorage.getItem(KEY);
     if (!raw) {
       return {};
@@ -187,6 +205,10 @@ export class PermissionsStore {
   }
 
   private loadHistory(): PermissionVersion[] {
+    if (!this.isBrowser) {
+      return [];
+    }
+
     const raw = localStorage.getItem(HISTORY_KEY);
     if (!raw) {
       return [];

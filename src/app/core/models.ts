@@ -10,10 +10,17 @@ export type Role = 'ADMIN' | 'CUSTOMER';
 
 export interface AuthResponse {
   accessToken: string;
-  tokenType: string;
+  refreshToken: string;
+  tokenType: 'Bearer';
   userId: number;
   email: string;
   role: Role;
+  accessTokenExpiresAt: string;
+  refreshTokenExpiresAt: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
 }
 
 export interface AuthRequest {
@@ -25,7 +32,7 @@ export interface RegisterRequest {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone?: string;
   password: string;
   address: Address;
 }
@@ -119,11 +126,11 @@ export interface UserRequest {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone?: string;
   address: Address;
 }
 
-export interface ApiError {
+export interface ApiErrorResponse {
   timestamp?: string;
   status?: number;
   error?: string;
@@ -131,3 +138,5 @@ export interface ApiError {
   path?: string;
   fieldErrors?: Record<string, string>;
 }
+
+export type ApiError = ApiErrorResponse;

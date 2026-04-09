@@ -11,6 +11,7 @@ import {
   Product,
   ProductListQuery,
   ProductRequest,
+  RefreshTokenRequest,
   RegisterRequest,
   User,
   UserRequest
@@ -58,7 +59,11 @@ export class ApiClient {
   }
 
   logout(): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(this.endpoint('/auth/logout'), {});
+    return this.http.post<{ message: string }>(this.endpoint('/auth/logout'), null);
+  }
+
+  refresh(payload: RefreshTokenRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(this.endpoint('/auth/refresh'), payload);
   }
 
   listProducts(query?: ProductListQuery): Observable<PageResponse<Product>>;
