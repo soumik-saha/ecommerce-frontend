@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 @Component({
   selector: 'ds-skeleton-grid',
@@ -19,8 +19,5 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 export class DsSkeletonComponent {
   readonly count = input(4);
   readonly ariaLabel = input('Loading content');
-
-  protected placeholders(): number[] {
-    return Array.from({ length: Math.max(1, this.count()) }, (_, index) => index);
-  }
+  protected readonly placeholders = computed(() => Array.from({ length: Math.max(1, this.count()) }, (_, index) => index));
 }

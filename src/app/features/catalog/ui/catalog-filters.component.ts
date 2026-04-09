@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, SimpleChanges, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CatalogQuery } from '../../../state/catalog/catalog.state';
 
@@ -39,8 +39,8 @@ import { CatalogQuery } from '../../../state/catalog/catalog.state';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CatalogFiltersComponent {
-  readonly query = input.required<CatalogQuery>();
+export class CatalogFiltersComponent implements OnChanges {
+  @Input({ required: true }) query!: CatalogQuery;
   readonly changed = output<Partial<CatalogQuery>>();
 
   protected localCategory = '';
@@ -48,12 +48,15 @@ export class CatalogFiltersComponent {
   protected localMinPrice: number | null = null;
   protected localMaxPrice: number | null = null;
 
-  ngOnInit(): void {
-    const query = this.query();
-    this.localCategory = query.category;
-    this.localSortBy = query.sortBy;
-    this.localMinPrice = query.minPrice;
-    this.localMaxPrice = query.maxPrice;
+  ngOnChanges(changes: SimpleChanges): void {
+    const queryChange = changes['query'];
+    if (!queryChange || !this.query) {
+      return;
+    }
+    this.localCategory = this.query.category;
+    this.localSortBy = this.query.sortBy;
+    this.localMinPrice = this.query.minPrice;
+    this.localMaxPrice = this.query.maxPrice;
   }
 
   protected applyFilters(): void {

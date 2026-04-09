@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Store } from '@ngrx/store';
 import { ProductCardComponent } from '../../../shared/product-card.component';
@@ -73,7 +73,7 @@ import {
   `,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CatalogPageComponent {
+export class CatalogPageComponent implements OnInit {
   private readonly store = inject(Store);
 
   protected readonly query = this.store.selectSignal(selectCatalogQuery);
@@ -87,7 +87,7 @@ export class CatalogPageComponent {
   protected readonly showFilters = signal(false);
   protected keyword = '';
 
-  constructor() {
+  ngOnInit(): void {
     this.keyword = this.query().keyword;
     this.store.dispatch(catalogActions.loadRequested());
   }

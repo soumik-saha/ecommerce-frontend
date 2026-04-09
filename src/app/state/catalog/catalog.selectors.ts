@@ -12,7 +12,15 @@ export const selectCatalogTotalPages = catalogFeature.selectTotalPages;
 export const selectCatalogTotalElements = catalogFeature.selectTotalElements;
 
 export const selectCatalogQueryKey = createSelector(selectCatalogQuery, (query) => {
-  return [query.keyword.trim(), query.category.trim(), query.minPrice ?? '', query.maxPrice ?? '', query.page, query.size].join('|');
+  return JSON.stringify({
+    keyword: query.keyword.trim(),
+    category: query.category.trim(),
+    minPrice: query.minPrice ?? null,
+    maxPrice: query.maxPrice ?? null,
+    sortBy: query.sortBy,
+    page: query.page,
+    size: query.size
+  });
 });
 
 export const selectCatalogCacheEntry = createSelector(
